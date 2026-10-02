@@ -1,0 +1,1018 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Revisão: Inteligência Artificial</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@500;700;800&family=Atkinson+Hyperlegible:ital,wght@0,400;0,700;1,400&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#EEF1FF; --bg-dot:#D7DDFB; --surface:#FFFFFF; --ink:#1E1B4B; --ink-soft:#4A4780;
+  --violet:#5B4BDB; --violet-soft:#E6E2FF; --sun:#FFC940; --sun-soft:#FFF4D1;
+  --ok:#128A63; --ok-soft:#DDF6EC; --bad:#D63B42; --bad-soft:#FDE4E5; --mid:#C98A00;
+  --line:#CBD1F5; --shadow:0 6px 0 #C9CEF2; --btn-ink:#fff; --btn-edge:#3B2FA8;
+  --display:"Baloo 2", "Trebuchet MS", system-ui, sans-serif;
+  --body:"Atkinson Hyperlegible", "Segoe UI", system-ui, sans-serif;
+  box-sizing:border-box;
+  padding-top:env(safe-area-inset-top,0px);
+  padding-bottom:env(safe-area-inset-bottom,0px);
+}
+@media (prefers-color-scheme:dark){
+  :root:not([data-theme="light"]){
+    --bg:#15143A; --bg-dot:#23225A; --surface:#1F1E4F; --ink:#F1F0FF; --ink-soft:#B9B6E8;
+    --violet:#9D90FF; --violet-soft:#2E2B6E; --sun:#FFD166; --sun-soft:#3A3320;
+    --ok:#4FD6A5; --ok-soft:#123B33; --bad:#FF7A80; --bad-soft:#44202A; --mid:#FFD166;
+    --line:#39377A; --shadow:0 6px 0 #0E0D2A; --btn-ink:#15143A; --btn-edge:#5A4FC0;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#15143A; --bg-dot:#23225A; --surface:#1F1E4F; --ink:#F1F0FF; --ink-soft:#B9B6E8;
+  --violet:#9D90FF; --violet-soft:#2E2B6E; --sun:#FFD166; --sun-soft:#3A3320;
+  --ok:#4FD6A5; --ok-soft:#123B33; --bad:#FF7A80; --bad-soft:#44202A; --mid:#FFD166;
+  --line:#39377A; --shadow:0 6px 0 #0E0D2A; --btn-ink:#15143A; --btn-edge:#5A4FC0;
+}
+*,*::before,*::after{box-sizing:inherit}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+body{
+  margin:0; min-height:100vh; background:var(--bg); color:var(--ink);
+  font-family:var(--body); font-size:1.0625rem; line-height:1.55;
+  background-image:radial-gradient(var(--bg-dot) 1.5px, transparent 1.5px);
+  background-size:22px 22px;
+}
+.wrap{max-width:780px; margin:0 auto; padding:1.25rem 1rem 3rem}
+button{font:inherit; color:inherit; cursor:pointer}
+:focus-visible{outline:3px solid var(--violet); outline-offset:3px; border-radius:10px}
+
+.top{display:flex; align-items:center; justify-content:space-between; gap:1rem; margin-bottom:1rem}
+.brand{font-family:var(--display); font-weight:800; font-size:1.2rem; line-height:1.1}
+.brand small{display:block; font-weight:500; font-size:.9rem; color:var(--ink-soft)}
+.score{display:flex; gap:.5rem; align-items:center}
+.pill{font-family:var(--display); font-weight:700; background:var(--surface); border:2px solid var(--line);
+  border-radius:999px; padding:.15rem .8rem; font-size:1rem; white-space:nowrap}
+.pill.streak{background:var(--sun-soft); border-color:var(--sun)}
+
+/* Trilha: um segmento por questão, funciona de 10 a 40 */
+.trail{display:flex; gap:4px; margin:.25rem 0 1.25rem}
+.seg{flex:1; height:12px; border-radius:6px; background:var(--surface); border:2px solid var(--line); transition:background .25s, transform .25s}
+.seg.ok{background:var(--ok); border-color:var(--ok)}
+.seg.bad{background:var(--bad); border-color:var(--bad)}
+.seg.now{border-color:var(--violet); background:var(--violet-soft); transform:scaleY(1.5)}
+
+.card{background:var(--surface); border:2px solid var(--line); border-radius:22px; box-shadow:var(--shadow);
+  padding:1.5rem 1.5rem 1.25rem}
+@media (max-width:520px){ .card{padding:1.1rem 1rem 1rem; border-radius:18px} }
+.meta{display:flex; flex-wrap:wrap; gap:.5rem; align-items:center; margin-bottom:.9rem}
+.topic{background:var(--violet-soft); color:var(--violet); font-weight:700; font-size:.85rem; padding:.2rem .7rem; border-radius:8px}
+.count{font-size:.9rem; color:var(--ink-soft)}
+.scenario{background:var(--sun-soft); border-radius:6px 16px 16px 16px; padding:1rem 1.1rem; margin:0 0 1rem; font-size:1rem; border-left:5px solid var(--sun)}
+.scenario b{font-family:var(--display); display:block; font-size:.95rem; margin-bottom:.15rem}
+h2.q{font-family:var(--display); font-weight:700; font-size:1.35rem; line-height:1.25; margin:0 0 1rem}
+
+.opts{display:grid; gap:.6rem; margin:0; padding:0; list-style:none}
+.opt{display:flex; gap:.8rem; align-items:flex-start; width:100%; text-align:left;
+  background:var(--surface); border:2px solid var(--line); border-radius:14px; padding:.75rem .9rem;
+  transition:border-color .15s, background .15s, transform .1s}
+.opt:hover:not(:disabled){border-color:var(--violet); background:var(--violet-soft)}
+.opt:active:not(:disabled){transform:translateY(2px)}
+.opt:disabled{cursor:default}
+.letter{flex:none; width:32px; height:32px; border-radius:10px; display:grid; place-items:center;
+  font-family:var(--display); font-weight:800; background:var(--violet-soft); color:var(--violet)}
+.opt .txt{padding-top:.2rem}
+.opt.dim{opacity:.45}
+.opt.right{border-color:var(--ok); background:var(--ok-soft)}
+.opt.right .letter{background:var(--ok); color:#fff}
+.opt.wrong{border-color:var(--bad); background:var(--bad-soft)}
+.opt.wrong .letter{background:var(--bad); color:#fff}
+.opt.shake{animation:shake .4s}
+@keyframes shake{20%,60%{transform:translateX(-6px)}40%,80%{transform:translateX(6px)}}
+.opt.pop{animation:pop .35s}
+@keyframes pop{50%{transform:scale(1.03)}}
+
+.fb{margin-top:1.1rem; border-radius:16px; padding:1rem 1.1rem; display:none}
+.fb.show{display:block; animation:rise .3s ease-out}
+@keyframes rise{from{opacity:0; transform:translateY(8px)} to{opacity:1; transform:none}}
+.fb.ok{background:var(--ok-soft); border:2px solid var(--ok)}
+.fb.bad{background:var(--bad-soft); border:2px solid var(--bad)}
+.fb h3{font-family:var(--display); font-size:1.35rem; margin:0 0 .4rem; line-height:1.2}
+.fb.ok h3{color:var(--ok)} .fb.bad h3{color:var(--bad)}
+.compare{display:grid; gap:.5rem; margin:.4rem 0 .8rem}
+.compare div{background:var(--surface); border-radius:10px; padding:.55rem .75rem; font-size:.97rem}
+.compare .w{border-left:5px solid var(--bad)} .compare .r{border-left:5px solid var(--ok)}
+.compare strong{display:block; font-size:.85rem}
+.tip{background:var(--surface); border-radius:12px; padding:.75rem .9rem; font-size:.98rem}
+.tip b.h{font-family:var(--display); font-size:1rem; display:block; margin-bottom:.2rem}
+.tip ul{margin:.3rem 0 0; padding-left:1.2rem} .tip li{margin:.2rem 0}
+
+.actions{display:flex; justify-content:space-between; align-items:center; gap:.75rem; margin-top:1.1rem; flex-wrap:wrap}
+.hint{font-size:.85rem; color:var(--ink-soft)}
+.btn{font-family:var(--display); font-weight:700; font-size:1.1rem; border:none; border-radius:14px;
+  padding:.6rem 1.4rem; background:var(--violet); color:var(--btn-ink); box-shadow:0 4px 0 var(--btn-edge); transition:transform .1s, box-shadow .1s}
+.btn:active{transform:translateY(3px); box-shadow:0 1px 0 var(--btn-edge)}
+.btn[hidden]{display:none}
+.btn.ghost{background:var(--surface); color:var(--ink); border:2px solid var(--line); box-shadow:0 4px 0 var(--line)}
+.link{background:none; border:none; color:var(--ink-soft); text-decoration:underline; font-size:.9rem; padding:.2rem}
+
+/* Início */
+.hero{text-align:center; padding:2rem 1.5rem}
+.hero .emoji{font-size:3.5rem; line-height:1}
+.hero h1{font-family:var(--display); font-weight:800; font-size:clamp(2rem,6vw,3rem); line-height:1.05; margin:.5rem 0 .6rem}
+.hero p{max-width:34rem; margin:0 auto 1rem; color:var(--ink-soft)}
+.rules{display:flex; flex-wrap:wrap; justify-content:center; gap:.5rem; margin:1rem 0 1.25rem; padding:0; list-style:none}
+.rules li{background:var(--violet-soft); border-radius:10px; padding:.35rem .8rem; font-size:.93rem}
+.pick-title{font-family:var(--display); font-weight:700; font-size:1.25rem; margin:.5rem 0 .75rem}
+.sizes{display:grid; grid-template-columns:repeat(4,1fr); gap:.75rem; max-width:560px; margin:0 auto}
+@media (max-width:520px){ .sizes{grid-template-columns:repeat(2,1fr)} }
+.size{background:var(--surface); border:3px solid var(--line); border-radius:18px; padding:.9rem .5rem .8rem;
+  box-shadow:0 5px 0 var(--line); transition:transform .12s, border-color .12s, box-shadow .12s}
+.size:hover{border-color:var(--violet); transform:translateY(-3px); box-shadow:0 8px 0 var(--violet-soft)}
+.size:active{transform:translateY(3px); box-shadow:0 1px 0 var(--line)}
+.size .n{display:block; font-family:var(--display); font-weight:800; font-size:2.4rem; line-height:1; color:var(--violet)}
+.size .l{display:block; font-weight:700; font-size:.95rem}
+.size .t{display:block; font-size:.82rem; color:var(--ink-soft)}
+.note{font-size:.88rem; color:var(--ink-soft); margin-top:1rem}
+
+/* Resultado */
+.result-head{text-align:center}
+.big-score{font-family:var(--display); font-weight:800; font-size:4.5rem; line-height:1; color:var(--violet)}
+.big-score span{font-size:2rem; color:var(--ink-soft)}
+.stars{font-size:2rem; letter-spacing:.2rem; margin:.4rem 0}
+.sec{margin-top:1.75rem}
+.sec h3{font-family:var(--display); font-size:1.35rem; margin:0 0 .6rem; line-height:1.2}
+.bars{display:grid; gap:.7rem}
+.bar-row .lbl{display:flex; justify-content:space-between; gap:1rem; font-size:.95rem; margin-bottom:.2rem}
+.bar-row .lbl b{font-weight:700}
+.track{height:14px; background:var(--bg); border-radius:7px; overflow:hidden; border:2px solid var(--line)}
+.fill{height:100%; border-radius:5px; width:0; transition:width .8s ease-out}
+.fill.hi{background:var(--ok)} .fill.md{background:var(--sun)} .fill.lo{background:var(--bad)}
+.improve{display:grid; gap:.7rem}
+.imp{background:var(--sun-soft); border-left:5px solid var(--sun); border-radius:6px 14px 14px 6px; padding:.8rem 1rem}
+.imp.good{background:var(--ok-soft); border-left-color:var(--ok)}
+.imp b.h{font-family:var(--display); font-size:1.05rem; display:block}
+.imp ul{margin:.3rem 0 0; padding-left:1.2rem} .imp li{margin:.15rem 0; font-size:.97rem}
+.qlist{display:grid; gap:.45rem}
+.qitem{background:var(--bg); border-radius:12px; border:2px solid transparent}
+.qitem summary{display:flex; gap:.6rem; align-items:flex-start; padding:.55rem .75rem; cursor:pointer; list-style:none; font-size:.95rem}
+.qitem summary::-webkit-details-marker{display:none}
+.qitem[open]{border-color:var(--line)}
+.qitem .dot{flex:none; width:24px; height:24px; border-radius:50%; display:grid; place-items:center; color:#fff; font-weight:700; font-size:.8rem; margin-top:.05rem}
+.dot.ok{background:var(--ok)} .dot.bad{background:var(--bad)}
+.qitem .qt small{display:block; color:var(--ink-soft); font-size:.82rem}
+.qitem .body{padding:0 .75rem .75rem 2.6rem; font-size:.95rem; display:grid; gap:.4rem}
+.qitem .body div{background:var(--surface); border-radius:10px; padding:.5rem .7rem}
+.qitem .body .w{border-left:5px solid var(--bad)} .qitem .body .r{border-left:5px solid var(--ok)}
+.qitem .body strong{display:block; font-size:.82rem}
+.empty{color:var(--ink-soft); font-size:.95rem; margin:0}
+.end-actions{display:flex; gap:.75rem; justify-content:center; flex-wrap:wrap; margin-top:1.75rem}
+
+#confetti{position:fixed; inset:0; pointer-events:none; z-index:50}
+.sr{position:absolute; width:1px; height:1px; overflow:hidden; clip:rect(0 0 0 0)}
+@media (prefers-reduced-motion:reduce){ *{animation:none!important; transition:none!important} }
+</style>
+</head>
+<body>
+<canvas id="confetti" aria-hidden="true"></canvas>
+<div class="wrap">
+  <header class="top">
+    <div class="brand">Inteligência Artificial<small>Revisão para a 1ª avaliação</small></div>
+    <div class="score" id="scoreBox" hidden>
+      <span class="pill" title="Acertos">⭐ <span id="scoreNum">0</span></span>
+      <span class="pill streak" title="Acertos seguidos">🔥 <span id="streakNum">0</span></span>
+    </div>
+  </header>
+  <nav class="trail" id="trail" aria-label="Progresso" hidden></nav>
+  <main id="app"></main>
+  <div class="sr" aria-live="polite" id="live"></div>
+</div>
+
+<script>
+/* ============ TEMAS ============ */
+const TOPICS = {
+  fundamentos:{ name:"Fundamentos e aprendizagem supervisionada",
+    study:["Diferencie overfitting (vai bem no treino e mal em dados novos) de underfitting (vai mal nos dois).",
+           "Revise o papel de cada conjunto: treino, validação e teste, e a validação cruzada k-fold.",
+           "Separe regressão (saída numérica) de classificação (saída em categorias).",
+           "Estude métricas além da acurácia: precisão, recall e matriz de confusão."]},
+  otimizacao:{ name:"Meta-heurísticas e computação natural",
+    study:["Revise o ciclo do Algoritmo Genético: população, aptidão, seleção, cruzamento e mutação.",
+           "Compare as inspirações: AG (evolução), ACO (formigas e feromônio), PSO (bandos de pássaros) e RNA (neurônios).",
+           "Entenda por que meta-heurísticas aceitam soluções “boas o suficiente” e como escapam de ótimos locais."]},
+  naosup:{ name:"Aprendizagem não supervisionada",
+    study:["Lembre que não supervisionado significa dados sem rótulo: o algoritmo descobre a estrutura sozinho.",
+           "Compare K-Means (precisa de K, grupos arredondados), DBSCAN (densidade e outliers) e clustering hierárquico (dendrograma).",
+           "Revise o método do cotovelo, o PCA e as regras de associação (suporte e confiança)."]},
+  reforco:{ name:"Aprendizagem por reforço",
+    study:["Decore os elementos: agente, ambiente, estado, ação, recompensa e política.",
+           "Revise o MDP e a propriedade de Markov: o futuro depende só do estado atual e da ação.",
+           "Entenda exploração × explotação, o fator de desconto γ e a tabela Q do Q-learning."]},
+  bayes:{ name:"Aprendizagem bayesiana",
+    study:["Memorize a fórmula P(A|B) = P(B|A)·P(A) / P(B) e o nome de cada termo.",
+           "Treine as contas com uma população hipotética (por exemplo, 10.000 pessoas) para não se perder nas porcentagens.",
+           "Lembre que um prior baixo puxa o posterior para baixo, mesmo com um bom exame.",
+           "Revise a suposição “ingênua” do Naive Bayes: atributos independentes dada a classe."]}
+};
+
+/* ============ QUESTÕES ============
+   Campo p (prioridade no sorteio): 1 = sempre entra; 2 = entra assim que houver espaço; sem p = complemento. */
+const QUESTIONS = [
+/* ---------- FUNDAMENTOS E SUPERVISIONADA ---------- */
+{ t:"fundamentos", p:1,
+  s:"Uma fintech desenvolveu um modelo para aprovar ou negar crédito a novos clientes. Durante os testes, a equipe de dados observou que o modelo acerta 99% dos casos presentes na base usada para treiná-lo, mas, quando é exposto a clientes novos (dados nunca vistos antes), a taxa de acerto cai para apenas 61%.",
+  q:"Esse comportamento é um sintoma clássico de qual problema fundamental em Machine Learning?",
+  o:["Underfitting (subajuste), pois o modelo é simples demais para capturar os padrões dos dados.",
+     "Overfitting (sobreajuste), pois o modelo memorizou particularidades do conjunto de treino que não se generalizam.",
+     "Data leakage, causado exclusivamente pela ausência de normalização das variáveis numéricas.",
+     "Viés de seleção, decorrente do uso de um algoritmo não supervisionado para um problema de classificação.",
+     "Convergência prematura, um fenômeno específico de algoritmos meta-heurísticos."],
+  c:1, tip:["Decorou em vez de aprender",[
+    "<b>Overfitting</b>: ótimo no treino, ruim em dados novos. O modelo decorou ruído e detalhes.",
+    "Sinal clássico: grande distância entre o desempenho no treino e no teste.",
+    "Remédios: mais dados, modelo mais simples, regularização, validação cruzada e poda (em árvores)."]]},
+{ t:"fundamentos", p:1,
+  s:"Uma imobiliária deseja criar dois sistemas distintos: (1) um que estime o valor de venda de um imóvel (um número em reais, como R$ 350.000,00) com base em características como área, localização e número de quartos; e (2) outro que decida se um imóvel anunciado é “residencial” ou “comercial”.",
+  q:"Do ponto de vista da Aprendizagem Supervisionada, esses dois sistemas correspondem, respectivamente, a problemas de:",
+  o:["Classificação e Classificação.",
+     "Clustering e Regressão.",
+     "Regressão e Classificação.",
+     "Regressão e Regressão.",
+     "Detecção de Anomalias e Clustering."],
+  c:2, tip:["Número ou categoria?",[
+    "<b>Regressão</b>: a saída é um valor numérico contínuo (preço, temperatura, toneladas).",
+    "<b>Classificação</b>: a saída é uma categoria (residencial/comercial, spam/não spam).",
+    "As duas são supervisionadas: o modelo aprende com exemplos que já têm a resposta."]]},
+{ t:"fundamentos", p:1,
+  s:"Ao treinar um modelo de classificação, um cientista de dados divide a base original em três partes: uma para treinar o modelo, outra para ajustar hiperparâmetros e comparar diferentes versões do modelo durante o desenvolvimento, e uma terceira, usada uma única vez, ao final, para reportar a performance real esperada em produção.",
+  q:"Essa terceira parte da base, usada apenas ao final do processo, é chamada de conjunto de:",
+  o:["Treino (training set).",
+     "Validação (validation set).",
+     "Teste (test set).",
+     "Reforço (reward set).",
+     "Clustering (grouping set)."],
+  c:2, tip:["Treino, validação e teste",[
+    "<b>Treino</b>: o modelo aprende. <b>Validação</b>: ajusta hiperparâmetros e compara versões.",
+    "<b>Teste</b>: usado <b>uma vez só</b>, no fim, para estimar o desempenho real.",
+    "Se o teste for usado para ajustar o modelo, ele deixa de ser uma estimativa honesta."]]},
+{ t:"fundamentos", p:2,
+  s:"Uma empresa do agronegócio quer prever a produtividade, em toneladas por hectare, da próxima safra de soja. Ela tem o histórico de clima, solo e insumos de safras anteriores e, para cada uma delas, sabe exatamente quanto foi colhido.",
+  q:"Qual paradigma de aprendizagem é o mais adequado para esse processo, e por quê?",
+  o:["Aprendizagem supervisionada (regressão), pois há exemplos históricos com a resposta conhecida (a produtividade real) e a saída é um valor numérico.",
+     "Aprendizagem não supervisionada, pois o objetivo é agrupar as safras em perfis semelhantes.",
+     "Aprendizagem por reforço, pois o modelo precisa testar diferentes safras por tentativa e erro.",
+     "Aprendizagem supervisionada (classificação), pois a saída é uma categoria como “boa” ou “ruim”.",
+     "Nenhum paradigma de ML se aplica, pois o clima não pode ser previsto."],
+  c:0, tip:["Tem rótulo? É supervisionado",[
+    "A pista é <b>“sabe exatamente quanto foi colhido”</b>: esses são os rótulos.",
+    "A saída em <b>toneladas por hectare</b> é numérica, então é <b>regressão</b>.",
+    "Algoritmos possíveis: regressão linear, árvores de regressão, random forest."]]},
+{ t:"fundamentos",
+  s:"Um modelo de regressão linear simples foi usado para prever o consumo de energia de uma fábrica, que varia de forma bastante não linear ao longo do dia. O modelo teve desempenho ruim tanto no conjunto de treino (58% de acerto) quanto no de teste (55%).",
+  q:"Qual problema o modelo apresenta?",
+  o:["Overfitting, pois decorou os dados de treino.",
+     "Underfitting (subajuste): o modelo é simples demais para capturar o padrão e vai mal até nos dados que já viu.",
+     "Data leakage, pois o teste vazou para o treino.",
+     "Nenhum problema, já que treino e teste tiveram resultados parecidos.",
+     "Excesso de dados de treino."],
+  c:1, tip:["Simples demais",[
+    "<b>Underfitting</b>: desempenho ruim no treino <b>e</b> no teste.",
+    "<b>Overfitting</b>: bom no treino, ruim no teste.",
+    "Remédios para underfitting: modelo mais complexo, atributos mais relevantes, menos regularização."]]},
+{ t:"fundamentos",
+  s:"Em uma base de transações bancárias, apenas 1% são fraudes. Um modelo que responde “não é fraude” para absolutamente todas as transações obteve 99% de acurácia, mas não detectou nenhuma fraude.",
+  q:"O que essa situação mostra?",
+  o:["Que 99% de acurácia sempre indica um ótimo modelo.",
+     "Que o problema deveria ser tratado como regressão.",
+     "Que, em dados desbalanceados, a acurácia engana; é preciso olhar métricas como recall e precisão da classe minoritária (fraude).",
+     "Que o modelo sofre de underfitting por ter dados demais.",
+     "Que as fraudes devem ser removidas da base para melhorar o treino."],
+  c:2, tip:["A armadilha da acurácia",[
+    "Com classes <b>desbalanceadas</b>, “chutar a classe maior” já dá acurácia alta.",
+    "<b>Recall</b>: das fraudes reais, quantas o modelo pegou? Aqui foi 0%.",
+    "<b>Precisão</b>: dos alertas de fraude, quantos eram fraude mesmo? Veja tudo na <b>matriz de confusão</b>."]]},
+{ t:"fundamentos",
+  s:"Com uma base pequena de 500 pacientes, uma pesquisadora não quer depender de uma única divisão entre treino e teste. Ela divide os dados em 5 partes iguais, treina 5 vezes (cada vez usando 4 partes para treino e 1 parte diferente para avaliação) e tira a média dos resultados.",
+  q:"Essa técnica é chamada de:",
+  o:["Validação cruzada k-fold.",
+     "Bootstrapping de rótulos.",
+     "Gradiente descendente.",
+     "Aprendizagem por reforço.",
+     "Clustering hierárquico."],
+  c:0, tip:["Todo dado vira teste uma vez",[
+    "Na <b>validação cruzada k-fold</b>, cada parte serve de avaliação exatamente uma vez.",
+    "A média dos k resultados é mais confiável do que uma divisão única.",
+    "Muito útil em bases pequenas e para escolher hiperparâmetros."]]},
+{ t:"fundamentos",
+  s:"Para prever se um novo cliente vai cancelar a assinatura, um algoritmo procura os 5 clientes mais parecidos com ele no histórico (pela distância entre suas características) e atribui a classe que for maioria entre esses 5.",
+  q:"Qual algoritmo foi descrito?",
+  o:["K-Means.",
+     "Algoritmo genético.",
+     "Regressão linear.",
+     "K-Nearest Neighbors (KNN), um classificador supervisionado baseado nos vizinhos mais próximos.",
+     "DBSCAN."],
+  c:3, tip:["Diga-me com quem andas",[
+    "<b>KNN</b>: classifica pelo voto dos <b>k vizinhos</b> mais próximos.",
+    "É supervisionado: os vizinhos já têm rótulo. Não confunda com <b>K-Means</b>, que agrupa sem rótulo.",
+    "Atributos em escalas diferentes distorcem a distância, então normalizar ajuda muito."]]},
+
+/* ---------- META-HEURÍSTICAS E COMPUTAÇÃO NATURAL ---------- */
+{ t:"otimizacao", p:1,
+  s:"Uma transportadora precisa definir a rota de entrega para um caminhão que deve visitar 40 cidades diferentes, retornando ao ponto de origem, minimizando a distância total percorrida. O número de rotas possíveis é tão grande que testar todas as combinações (força bruta) levaria mais tempo do que a idade do universo, mesmo em um supercomputador.",
+  q:"Qual técnica meta-heurística é descrita a seguir e seria adequada para esse problema: “mantém uma população de soluções candidatas (rotas), que evoluem ao longo de gerações por meio de operações de seleção dos mais aptos, cruzamento (recombinação) entre soluções e mutação aleatória”?",
+  o:["Busca em Grade (Grid Search) exaustiva sobre o espaço de rotas.",
+     "Algoritmo Genético (AG).",
+     "Regressão Linear Múltipla aplicada às coordenadas geográficas.",
+     "K-Nearest Neighbors (KNN) para classificação de rotas.",
+     "Análise de Componentes Principais (PCA)."],
+  c:1, tip:["Evolução dentro do computador",[
+    "<b>Algoritmo Genético</b>: população → <b>aptidão</b> → <b>seleção</b> → <b>cruzamento</b> → <b>mutação</b> → nova geração.",
+    "Problemas como o do caixeiro-viajante são <b>combinatórios</b>: a força bruta é inviável.",
+    "Meta-heurísticas não garantem o ótimo, mas acham soluções muito boas em tempo razoável."]]},
+{ t:"otimizacao", p:1,
+  s:"Uma equipe de pesquisa em redes de telecomunicações precisa otimizar o roteamento de pacotes de dados em uma rede complexa. Eles se inspiraram no comportamento de colônias de formigas: as formigas depositam feromônio ao percorrer caminhos entre o formigueiro e a comida, e os caminhos mais curtos acabam acumulando mais feromônio, sendo reforçados e seguidos por mais formigas ao longo do tempo.",
+  q:"Essa técnica de computação natural, inspirada na inteligência coletiva de colônias de formigas, é conhecida como:",
+  o:["Redes Neurais Artificiais (RNA).",
+     "Otimização por Enxame de Partículas (PSO, Particle Swarm Optimization).",
+     "Otimização por Colônia de Formigas (ACO, Ant Colony Optimization).",
+     "Sistemas Imunológicos Artificiais.",
+     "Clustering Hierárquico Aglomerativo."],
+  c:2, tip:["Feromônio é a pista",[
+    "<b>ACO</b>: formigas virtuais deixam feromônio; caminhos curtos acumulam mais e são reforçados.",
+    "O feromônio também <b>evapora</b>, o que evita que todas fiquem presas a um caminho ruim.",
+    "<b>PSO</b> é inspirado em bandos de pássaros e cardumes, não em formigas."]]},
+{ t:"otimizacao",
+  s:"Para ajustar os parâmetros de uma antena, cada solução candidata é uma “partícula” que se move pelo espaço de busca. A cada passo, ela ajusta sua velocidade levando em conta a melhor posição que ela mesma já encontrou e a melhor posição encontrada pelo grupo inteiro, como um bando de pássaros procurando comida.",
+  q:"Qual técnica é essa?",
+  o:["Otimização por Colônia de Formigas (ACO).",
+     "Otimização por Enxame de Partículas (PSO).",
+     "Têmpera simulada.",
+     "Regressão logística.",
+     "Busca em largura."],
+  c:1, tip:["O bando se guia junto",[
+    "<b>PSO</b>: cada partícula combina a <b>sua melhor posição</b> com a <b>melhor do enxame</b>.",
+    "Inspirado em bandos de pássaros e cardumes de peixes.",
+    "Diferente do ACO, não há feromônio: a comunicação é pela melhor posição global."]]},
+{ t:"otimizacao",
+  s:"Um algoritmo de otimização inspirado no resfriamento lento de metais começa aceitando com frequência soluções piores que a atual. Conforme um parâmetro chamado “temperatura” diminui, ele fica cada vez mais exigente, até aceitar quase só melhorias.",
+  q:"Que meta-heurística é essa?",
+  o:["Algoritmo genético.",
+     "K-Means.",
+     "Têmpera simulada (Simulated Annealing).",
+     "Busca exaustiva.",
+     "Naive Bayes."],
+  c:2, tip:["Esfriar devagar",[
+    "<b>Têmpera simulada</b>: aceita pioras com uma probabilidade que cai junto com a <b>temperatura</b>.",
+    "Aceitar pioras no começo ajuda a <b>escapar de ótimos locais</b>.",
+    "Se esfriar rápido demais, o algoritmo trava cedo numa solução ruim."]]},
+{ t:"otimizacao",
+  s:"Um algoritmo de subida de encosta (hill climbing) só aceita mudanças que melhorem a solução atual. Ele parou numa solução em que nenhuma pequena alteração melhora o resultado, mas existe outra solução, bem diferente, muito melhor.",
+  q:"O que aconteceu com o algoritmo?",
+  o:["Ele encontrou o ótimo global.",
+     "Ele ficou preso em um ótimo local.",
+     "Ele sofreu overfitting.",
+     "Ele entrou em um processo de Markov.",
+     "Ele convergiu para a solução de força bruta."],
+  c:1, tip:["O topo do morro errado",[
+    "<b>Ótimo local</b>: melhor que os vizinhos, mas não a melhor solução de todas (o <b>ótimo global</b>).",
+    "Buscas gulosas, que só aceitam melhorias, são muito propensas a isso.",
+    "Meta-heurísticas usam mutação, populações e aceitação de pioras para escapar."]]},
+{ t:"otimizacao",
+  s:"Em um algoritmo genético, depois de muitas gerações, todos os indivíduos da população ficaram praticamente iguais, e o algoritmo parou de encontrar soluções melhores.",
+  q:"Qual operador tem como papel principal reintroduzir diversidade e evitar esse problema?",
+  o:["Mutação, que faz pequenas alterações aleatórias nos indivíduos.",
+     "Função de perda.",
+     "Seleção elitista, que copia sempre os melhores.",
+     "Normalização dos dados.",
+     "Poda da árvore."],
+  c:0, tip:["Diversidade é combustível",[
+    "<b>Mutação</b>: alterações aleatórias que exploram regiões novas.",
+    "<b>Cruzamento</b>: combina partes de bons pais. <b>Seleção</b>: favorece os mais aptos.",
+    "Quando todos ficam iguais cedo demais, falamos em <b>convergência prematura</b>."]]},
+{ t:"otimizacao",
+  s:"Ao montar um algoritmo genético para criar a grade de horários de uma escola, a equipe precisa de uma forma de dar uma nota para cada grade candidata: mais pontos quando não há choque de horários e quando as preferências dos professores são respeitadas.",
+  q:"Esse componente é chamado de:",
+  o:["Taxa de mutação.",
+     "Hiperparâmetro de aprendizado.",
+     "Feromônio.",
+     "Conjunto de teste.",
+     "Função de aptidão (fitness), que mede o quão boa é cada solução."],
+  c:4, tip:["A nota de cada indivíduo",[
+    "A <b>função de aptidão</b> diz o quanto cada solução é boa para o problema.",
+    "A seleção usa essa nota para decidir quem se reproduz.",
+    "Uma aptidão mal definida faz o AG otimizar a coisa errada."]]},
+{ t:"otimizacao",
+  s:"Um modelo computacional é formado por unidades simples interligadas. Cada unidade recebe entradas, multiplica cada uma por um peso, soma tudo e aplica uma função de ativação para decidir sua saída, de forma inspirada no funcionamento das células do cérebro.",
+  q:"Essa técnica de computação natural é conhecida como:",
+  o:["Algoritmo genético.",
+     "Rede Neural Artificial (RNA).",
+     "Sistema imunológico artificial.",
+     "Otimização por colônia de formigas.",
+     "Árvore de decisão."],
+  c:1, tip:["Inspiração no cérebro",[
+    "<b>Neurônio artificial</b>: entradas × pesos, soma e função de ativação.",
+    "Aprender, numa RNA, é ajustar os <b>pesos</b>.",
+    "Computação natural: RNA (cérebro), AG (evolução), ACO (formigas), PSO (bandos), SIA (sistema imune)."]]},
+
+/* ---------- NÃO SUPERVISIONADA ---------- */
+{ t:"naosup", p:1,
+  s:"Uma equipe de marketing possui dados de comportamento de clientes de um e-commerce, sem qualquer rótulo prévio de segmento. Ao visualizar os dados, percebe que os clientes formam grupos de formato irregular (não circular) e que existem alguns poucos clientes com comportamento completamente atípico, que a equipe gostaria de identificar automaticamente como outliers, sem precisar definir de antemão quantos grupos existem.",
+  q:"Considerando essas características (clusters de formato irregular e necessidade de detectar outliers automaticamente, sem definir K previamente), qual algoritmo de clustering é mais adequado?",
+  o:["K-Means, pois é o algoritmo mais simples e rápido disponível.",
+     "Regressão Logística, por ser um algoritmo supervisionado robusto.",
+     "DBSCAN, pois agrupa por densidade, aceita clusters de formato irregular e marca outliers nativamente.",
+     "PCA, pois seu objetivo principal é agrupar clientes semelhantes.",
+     "Árvore de Decisão, pois permite classificar clientes sem necessidade de rótulos."],
+  c:2, tip:["Densidade vence formato",[
+    "<b>DBSCAN</b>: forma grupos pela <b>densidade</b> de pontos, sem precisar de K.",
+    "Aceita formatos irregulares e marca pontos isolados como <b>ruído/outliers</b>.",
+    "<b>K-Means</b> precisa de K e prefere grupos arredondados. PCA reduz dimensões, não agrupa."]]},
+{ t:"naosup", p:2,
+  s:"Uma empresa do agronegócio quer agrupar as centenas de propriedades rurais da região em perfis semelhantes de uso do solo. Não existe nenhuma categoria pré-definida: ninguém sabe de antemão quais perfis existem.",
+  q:"Qual paradigma de aprendizagem é o mais adequado para esse processo, e por quê?",
+  o:["Aprendizagem supervisionada, pois as propriedades já estão rotuladas por perfil.",
+     "Aprendizagem por reforço, pois as propriedades recebem recompensas por produtividade.",
+     "Regressão linear, pois o uso do solo é um número contínuo.",
+     "Aprendizagem não supervisionada (clustering), pois não há rótulos e o objetivo é descobrir grupos naturais nos dados.",
+     "Algoritmo genético, pois as propriedades evoluem ao longo das gerações."],
+  c:3, tip:["Sem rótulo, descubra os grupos",[
+    "A pista é <b>“nenhuma categoria pré-definida”</b>: não há resposta certa para aprender.",
+    "O algoritmo encontra os grupos sozinho pela <b>semelhança</b> entre as propriedades.",
+    "Opções: K-Means, DBSCAN ou clustering hierárquico."]]},
+{ t:"naosup",
+  s:"Uma rede de academias quer dividir seus alunos em exatamente 4 grupos de perfil de uso. O algoritmo escolhido começa sorteando 4 centros, associa cada aluno ao centro mais próximo, recalcula cada centro como a média do grupo e repete até os grupos pararem de mudar.",
+  q:"Qual algoritmo é esse?",
+  o:["K-Means.",
+     "KNN.",
+     "DBSCAN.",
+     "Q-learning.",
+     "Naive Bayes."],
+  c:0, tip:["Centros que se movem",[
+    "<b>K-Means</b>: escolhe K centros, atribui os pontos e recalcula as médias até estabilizar.",
+    "Precisa do <b>K definido antes</b> e funciona melhor com grupos arredondados de tamanho parecido.",
+    "É sensível a outliers e ao sorteio inicial dos centros."]]},
+{ t:"naosup",
+  s:"Antes de rodar o K-Means, um analista testou K de 1 a 10 e montou um gráfico da soma das distâncias dos pontos aos seus centros (inércia). A curva cai muito até K = 3 e, depois disso, quase não cai mais.",
+  q:"Esse procedimento para escolher K é conhecido como:",
+  o:["Validação cruzada k-fold.",
+     "Método do cotovelo, que sugere K = 3 como um bom número de grupos.",
+     "Teorema de Bayes.",
+     "Fator de desconto.",
+     "Matriz de confusão."],
+  c:1, tip:["Onde a curva dobra",[
+    "<b>Método do cotovelo</b>: escolha o K a partir do qual aumentar K quase não melhora a inércia.",
+    "Outra opção é o <b>coeficiente de silhueta</b>, que mede quão bem separados estão os grupos.",
+    "A inércia sempre cai com K maior; o segredo é achar o ponto de retorno pequeno."]]},
+{ t:"naosup",
+  s:"Um conjunto de dados de sensores tem 300 variáveis, muitas delas fortemente correlacionadas. A equipe quer reduzi-las a poucas variáveis novas que preservem a maior parte da variação dos dados, para visualizar e acelerar outros algoritmos.",
+  q:"Qual técnica não supervisionada é a mais indicada?",
+  o:["DBSCAN.",
+     "Regressão logística.",
+     "Análise de Componentes Principais (PCA), que reduz a dimensionalidade preservando a maior variância possível.",
+     "Algoritmo genético.",
+     "Processo de Decisão de Markov."],
+  c:2, tip:["Menos colunas, mesma informação",[
+    "<b>PCA</b> cria novas variáveis (componentes principais) combinando as originais.",
+    "Os primeiros componentes guardam a maior parte da <b>variância</b>.",
+    "Serve para <b>reduzir dimensões</b>, não para agrupar; o agrupamento pode vir depois."]]},
+{ t:"naosup",
+  s:"Uma bióloga quer agrupar espécies de plantas e ver como os grupos se juntam em níveis: primeiro as mais parecidas se unem, depois esses pares se unem a outros grupos, e assim por diante, formando uma árvore que ela pode “cortar” na altura que quiser.",
+  q:"Qual técnica gera essa árvore, chamada dendrograma?",
+  o:["Clustering hierárquico aglomerativo.",
+     "K-Means.",
+     "Árvore de decisão supervisionada.",
+     "PSO.",
+     "Q-learning."],
+  c:0, tip:["A árvore dos grupos",[
+    "<b>Hierárquico aglomerativo</b>: cada ponto começa sozinho e os grupos mais próximos vão se unindo.",
+    "O resultado é um <b>dendrograma</b>; a altura do corte define quantos grupos você terá.",
+    "Não precisa de K antecipado, mas fica pesado com bases muito grandes."]]},
+{ t:"naosup",
+  s:"Um supermercado analisou milhares de cupons fiscais, sem nenhum rótulo, e descobriu que quem compra fraldas costuma levar também lenços umedecidos. A combinação apareceu em 8% de todas as compras e, entre quem levou fraldas, 65% também levaram lenços.",
+  q:"Que técnica foi usada e como se chamam os valores 8% e 65%?",
+  o:["Classificação; 8% é a precisão e 65% é o recall.",
+     "Regras de associação (por exemplo, Apriori); 8% é o suporte e 65% é a confiança.",
+     "Regressão; 8% é o erro e 65% é o R².",
+     "Aprendizagem por reforço; 8% é a recompensa e 65% é a política.",
+     "Teorema de Bayes; 8% é o prior e 65% é o posterior."],
+  c:1, tip:["Análise de cesta de compras",[
+    "<b>Regras de associação</b> descobrem itens que aparecem juntos, sem rótulos.",
+    "<b>Suporte</b>: em quantas compras a combinação aparece. <b>Confiança</b>: dado o item A, com que frequência vem B.",
+    "Algoritmo clássico: <b>Apriori</b>."]]},
+{ t:"naosup",
+  s:"Um professor comparou dois projetos. No primeiro, o modelo aprende com milhares de fotos já marcadas como “gato” ou “cachorro”. No segundo, o modelo recebe milhares de fotos sem nenhuma marcação e precisa descobrir sozinho que tipos de imagem existem.",
+  q:"Os dois projetos são, respectivamente:",
+  o:["Não supervisionado e supervisionado.",
+     "Por reforço e supervisionado.",
+     "Supervisionado e não supervisionado.",
+     "Supervisionado e por reforço.",
+     "Ambos supervisionados."],
+  c:2, tip:["Com rótulo × sem rótulo",[
+    "<b>Supervisionado</b>: aprende com exemplos que já trazem a resposta (rótulo).",
+    "<b>Não supervisionado</b>: sem rótulos, busca estrutura: grupos, padrões, anomalias.",
+    "<b>Por reforço</b>: aprende interagindo com um ambiente e recebendo recompensas."]]},
+
+/* ---------- REFORÇO ---------- */
+{ t:"reforco", p:1,
+  s:"Um robô está aprendendo a se equilibrar sobre duas rodas por meio de tentativa e erro. A cada instante, ele observa sua inclinação atual (estado), decide aplicar mais ou menos torque em cada roda (ação) e recebe um sinal positivo quando permanece em pé e um sinal negativo quando cai (recompensa). Após milhares de tentativas em simulação, o robô aprende uma estratégia eficaz de equilíbrio.",
+  q:"O modelo matemático formal que descreve esse tipo de problema, assumindo que o próximo estado depende apenas do estado atual e da ação tomada (e não de todo o histórico anterior), é chamado de:",
+  o:["Árvore de Decisão Probabilística.",
+     "Processo de Decisão de Markov (MDP).",
+     "Análise de Componentes Principais (PCA).",
+     "Rede Bayesiana Dinâmica Supervisionada.",
+     "Algoritmo Genético Adaptativo."],
+  c:1, tip:["Markov: só o agora importa",[
+    "<b>MDP</b>: estados, ações, probabilidades de transição, recompensas e fator de desconto.",
+    "<b>Propriedade de Markov</b>: o próximo estado depende só do estado atual e da ação.",
+    "É a base matemática de quase toda a aprendizagem por reforço."]]},
+{ t:"reforco", p:2,
+  s:"Uma empresa do agronegócio quer um sistema de irrigação autônomo que aprenda, ao longo do tempo e por tentativa e erro, quando e quanto irrigar cada setor da plantação, para maximizar a produtividade e minimizar o desperdício de água.",
+  q:"Qual paradigma de aprendizagem é o mais adequado para esse processo, e por quê?",
+  o:["Aprendizagem supervisionada, pois há um rótulo pronto dizendo a quantidade certa de água para cada dia.",
+     "Aprendizagem não supervisionada, pois o objetivo é agrupar os setores da plantação.",
+     "Aprendizagem por reforço, pois um agente toma decisões em sequência, interage com o ambiente e aprende por tentativa e erro com recompensas (produtividade) e penalidades (desperdício).",
+     "Regressão linear, pois a quantidade de água é um número.",
+     "Clustering hierárquico, pois a irrigação forma uma árvore de decisões."],
+  c:2, tip:["Decidir, agir, receber retorno",[
+    "As pistas: <b>autônomo</b>, <b>tentativa e erro</b>, decisões <b>ao longo do tempo</b>.",
+    "Agente = controlador; ambiente = plantação; ação = quanto irrigar; recompensa = produtividade menos desperdício.",
+    "Não existe um rótulo com a “resposta certa” de cada dia: o agente descobre pela experiência."]]},
+{ t:"reforco",
+  s:"Depois de treinado, um agente que joga um jogo de labirinto tem uma regra que, para cada posição em que ele se encontra, indica qual movimento fazer (cima, baixo, esquerda ou direita).",
+  q:"Na aprendizagem por reforço, essa regra que associa estados a ações é chamada de:",
+  o:["Recompensa.",
+     "Função de aptidão.",
+     "Política (policy).",
+     "Prior.",
+     "Centroide."],
+  c:2, tip:["O mapa de decisões",[
+    "<b>Política (π)</b>: diz qual ação tomar em cada estado. É o que o agente aprende.",
+    "<b>Recompensa</b>: o sinal imediato que o ambiente devolve.",
+    "<b>Função de valor</b>: quanta recompensa futura se espera a partir de um estado."]]},
+{ t:"reforco",
+  s:"Um agente que recomenda restaurantes já descobriu um que costuma agradar. A cada escolha, com 90% de chance ele recomenda esse restaurante conhecido e, com 10% de chance, recomenda um aleatório que ainda não testou bem.",
+  q:"Essa estratégia, conhecida como ε-greedy, trata de qual dilema?",
+  o:["Viés × variância.",
+     "Precisão × recall.",
+     "Exploração (testar opções novas) × explotação (usar o que já se sabe que funciona).",
+     "Treino × teste.",
+     "Suporte × confiança."],
+  c:2, tip:["Arriscar ou repetir?",[
+    "<b>Explotação</b>: usar a melhor ação conhecida. <b>Exploração</b>: testar outras para aprender.",
+    "Só explotar pode prender o agente numa opção mediana; só explorar desperdiça recompensa.",
+    "<b>ε-greedy</b>: com probabilidade ε explora; no resto do tempo, explota."]]},
+{ t:"reforco",
+  s:"Um agente mantém uma tabela em que cada linha é um estado e cada coluna é uma ação. Cada célula guarda uma estimativa do retorno esperado ao tomar aquela ação naquele estado e é atualizada após cada passo, usando a recompensa recebida e o melhor valor do próximo estado.",
+  q:"Qual algoritmo de aprendizagem por reforço é esse?",
+  o:["Q-learning.",
+     "K-Means.",
+     "Naive Bayes.",
+     "PCA.",
+     "Algoritmo genético."],
+  c:0, tip:["A tabela Q",[
+    "<b>Q(s,a)</b>: quanto vale tomar a ação a no estado s.",
+    "Atualização: Q ← Q + α·[r + γ·max Q(s′,a′) − Q].",
+    "Quando há estados demais para uma tabela, usa-se uma rede neural: o <b>Deep Q-Network (DQN)</b>."]]},
+{ t:"reforco",
+  s:"Ao configurar um agente de reforço, a equipe ajustou um parâmetro γ (gama) entre 0 e 1. Com γ próximo de 0, o agente quase só se importa com a recompensa imediata; com γ próximo de 1, ele valoriza bastante as recompensas que virão no futuro.",
+  q:"Esse parâmetro é chamado de:",
+  o:["Taxa de mutação.",
+     "Fator de desconto.",
+     "Probabilidade a priori.",
+     "Temperatura.",
+     "Número de vizinhos k."],
+  c:1, tip:["Quanto vale o futuro?",[
+    "O <b>fator de desconto γ</b> pondera as recompensas futuras em relação às imediatas.",
+    "γ baixo: agente “imediatista”. γ alto: agente que planeja a longo prazo.",
+    "Não confunda com a <b>taxa de aprendizado α</b>, que controla o tamanho das atualizações."]]},
+{ t:"reforco",
+  s:"Um agente aprende a jogar xadrez. Ele só recebe recompensa no fim da partida: +1 se vencer e −1 se perder. Durante os 40 lances anteriores, não recebe nenhum sinal.",
+  q:"Qual característica da aprendizagem por reforço torna esse caso desafiador?",
+  o:["A ausência de dados rotulados por especialistas, o que torna o problema não supervisionado.",
+     "O excesso de recompensas imediatas.",
+     "A impossibilidade de representar o xadrez por estados.",
+     "A recompensa atrasada: o agente precisa descobrir quais lances, entre muitos, foram responsáveis pela vitória ou pela derrota.",
+     "O fato de o xadrez ser um problema de regressão."],
+  c:3, tip:["Quem leva o crédito?",[
+    "<b>Recompensa atrasada</b>: o resultado só aparece muito depois das decisões.",
+    "Distribuir o mérito entre as ações é o <b>problema de atribuição de crédito</b>.",
+    "O fator de desconto e as funções de valor ajudam a propagar a recompensa para trás."]]},
+{ t:"reforco",
+  s:"Uma aluna disse: “Na aprendizagem por reforço, o agente também recebe a resposta correta para cada situação, igual na supervisionada; a única diferença é o nome.”",
+  q:"Qual afirmação corrige a aluna?",
+  o:["Ela está certa: os dois paradigmas são idênticos.",
+     "No reforço, o agente não recebe a ação correta; recebe apenas uma recompensa que avalia o resultado e precisa descobrir as melhores ações interagindo com o ambiente.",
+     "No reforço, não há nenhum tipo de sinal de retorno.",
+     "O reforço só funciona com dados agrupados previamente por K-Means.",
+     "O reforço é um tipo de aprendizagem bayesiana."],
+  c:1, tip:["Nota, não gabarito",[
+    "<b>Supervisionado</b>: recebe o <b>gabarito</b> (a resposta certa).",
+    "<b>Reforço</b>: recebe uma <b>nota</b> (recompensa) sobre o que fez, muitas vezes atrasada.",
+    "As ações do agente mudam o ambiente e, portanto, os dados que ele vê depois."]]},
+
+/* ---------- BAYESIANA ---------- */
+{ t:"bayes", p:1,
+  s:"Um sistema de filtro de spam analisa a presença da palavra “promoção” nos e-mails. Historicamente, 40% dos e-mails são spam. Dos e-mails de spam, 70% contêm a palavra “promoção”. Dos e-mails legítimos (não spam), apenas 5% contêm essa palavra. O sistema utiliza o Teorema de Bayes para atualizar a probabilidade de um e-mail ser spam ao observar a presença dessa palavra.",
+  q:"Nesse contexto, o valor de 40% (probabilidade de um e-mail ser spam antes de observar qualquer palavra) é chamado, na notação bayesiana, de:",
+  o:["Verossimilhança (likelihood).",
+     "Probabilidade a priori (prior).",
+     "Evidência (evidence).",
+     "Probabilidade a posteriori (posterior).",
+     "Função de perda (loss function)."],
+  c:1, tip:["Os quatro nomes de Bayes",[
+    "<b>Prior P(A)</b>: crença antes da evidência (40% de spam).",
+    "<b>Verossimilhança P(B|A)</b>: chance da evidência se A for verdade (70%).",
+    "<b>Evidência P(B)</b>: chance total da evidência. <b>Posterior P(A|B)</b>: crença atualizada."]]},
+{ t:"bayes", p:2,
+  s:"Um exame para detectar uma doença rara tem estas características: a doença afeta 1% da população; a sensibilidade é de 90% (entre os doentes, 90% recebem resultado positivo); e a taxa de falso positivo é de 5% (entre os saudáveis, 5% recebem resultado positivo por engano). Um paciente recebe resultado POSITIVO. Dica: imagine uma população de 10.000 pessoas.",
+  q:"Qual é, aproximadamente, a probabilidade de ele estar de fato doente, P(doente | positivo)?",
+  o:["90%, que é a sensibilidade do exame.",
+     "Cerca de 15,4%: são 90 verdadeiros positivos entre 585 positivos no total (90 + 495).",
+     "95%, pois a taxa de falso positivo é de apenas 5%.",
+     "1%, pois o resultado do exame não muda a probabilidade.",
+     "Cerca de 50%, pois o resultado pode estar certo ou errado."],
+  c:1, tip:["Faça a conta com pessoas",[
+    "10.000 pessoas → <b>100 doentes</b> e <b>9.900 saudáveis</b>.",
+    "Positivos: 90% de 100 = <b>90</b> verdadeiros; 5% de 9.900 = <b>495</b> falsos.",
+    "P(doente | positivo) = 90 / (90 + 495) = 90 / 585 ≈ <b>15,4%</b>."]]},
+{ t:"bayes", p:2,
+  s:"No exame da doença rara (prevalência de 1%, sensibilidade de 90% e falso positivo de 5%), a chance real de doença após um resultado positivo é de apenas cerca de 15%. Muitos alunos acham isso estranho, já que o exame “acerta 90%”.",
+  q:"Qual é a explicação correta para esse resultado?",
+  o:["O exame é ruim e deveria ser descartado, pois erra na maioria dos casos.",
+     "O cálculo está errado: com sensibilidade de 90%, o posterior tem que ser 90%.",
+     "A sensibilidade só vale para as pessoas saudáveis.",
+     "Como o prior é muito baixo (1%), há muito mais saudáveis do que doentes; mesmo 5% de falso positivo sobre essa multidão gera mais positivos falsos do que verdadeiros, o que puxa o posterior para baixo.",
+     "O fenômeno ocorre porque o Teorema de Bayes ignora a probabilidade a priori."],
+  c:3, tip:["A falácia da taxa-base",[
+    "Ignorar o <b>prior</b> (a prevalência) e olhar só a sensibilidade é a <b>falácia da taxa-base</b>.",
+    "Com doença rara, os poucos verdadeiros positivos são “engolidos” pelos falsos positivos.",
+    "Por isso se repete o exame: o posterior de ~15% vira o novo prior, e um segundo positivo eleva a chance para cerca de 77%."]]},
+{ t:"bayes",
+  s:"Um filtro de spam calcula a probabilidade de um e-mail ser spam multiplicando as probabilidades de cada palavra aparecer em spam, como se a presença de “grátis” não tivesse nenhuma relação com a presença de “promoção”, dada a classe.",
+  q:"Essa simplificação é o que dá o nome de “ingênuo” a qual algoritmo?",
+  o:["K-Means, que supõe grupos esféricos.",
+     "Naive Bayes, que supõe que os atributos são independentes entre si, dada a classe.",
+     "Q-learning, que supõe recompensas independentes.",
+     "Algoritmo genético, que supõe genes independentes.",
+     "Regressão linear, que supõe erro zero."],
+  c:1, tip:["Ingênuo, mas eficiente",[
+    "<b>Naive Bayes</b> supõe <b>independência condicional</b> dos atributos dada a classe.",
+    "A suposição raramente é verdadeira, mas o classificador costuma funcionar muito bem com texto.",
+    "Vantagens: é rápido, precisa de poucos dados e é fácil de interpretar."]]},
+{ t:"bayes",
+  s:"No filtro de spam, 40% dos e-mails são spam. Dos e-mails de spam, 70% contêm a palavra “promoção”; dos legítimos, 5% contêm essa palavra.",
+  q:"Na notação bayesiana, o valor de 70%, isto é, P(“promoção” | spam), é chamado de:",
+  o:["Probabilidade a priori.",
+     "Probabilidade a posteriori.",
+     "Evidência.",
+     "Verossimilhança (likelihood).",
+     "Fator de desconto."],
+  c:3, tip:["Evidência dada a hipótese",[
+    "<b>Verossimilhança P(B|A)</b>: se a hipótese for verdade (é spam), qual a chance de ver a evidência (a palavra)?",
+    "Cuidado para não inverter: P(promoção | spam) ≠ P(spam | promoção).",
+    "Confundir as duas é um dos erros mais comuns em prova."]]},
+{ t:"bayes",
+  s:"No filtro de spam: P(spam) = 40%, P(“promoção” | spam) = 70% e P(“promoção” | não spam) = 5%. Chegou um e-mail com a palavra “promoção”.",
+  q:"Qual é, aproximadamente, a probabilidade a posteriori de ele ser spam?",
+  o:["40%.",
+     "70%.",
+     "Cerca de 90%: 0,28 / (0,28 + 0,03) ≈ 0,90.",
+     "5%.",
+     "28%."],
+  c:2, tip:["Passo a passo",[
+    "Spam com a palavra: 0,40 × 0,70 = <b>0,28</b>. Legítimo com a palavra: 0,60 × 0,05 = <b>0,03</b>.",
+    "Evidência P(promoção) = 0,28 + 0,03 = <b>0,31</b>.",
+    "Posterior = 0,28 / 0,31 ≈ <b>90%</b>. A palavra elevou a chance de 40% para 90%."]]},
+{ t:"bayes",
+  s:"Ao aplicar o Teorema de Bayes, P(A|B) = P(B|A) · P(A) / P(B), um aluno ficou em dúvida sobre o termo do denominador, P(B), calculado somando a chance da evidência em todos os cenários possíveis.",
+  q:"Como se chama o termo P(B) e para que ele serve?",
+  o:["Prior; representa a crença inicial na hipótese.",
+     "Evidência (probabilidade marginal); normaliza o resultado para que as probabilidades a posteriori somem 1.",
+     "Verossimilhança; mede o quanto a hipótese explica a evidência.",
+     "Posterior; é o resultado final da fórmula.",
+     "Recompensa; avalia a ação tomada."],
+  c:1, tip:["O denominador normaliza",[
+    "<b>P(B)</b> = P(B|A)·P(A) + P(B|não A)·P(não A).",
+    "É a chance total de ver a evidência, considerando todas as hipóteses.",
+    "Divide o numerador para que o posterior seja uma probabilidade válida."]]},
+{ t:"bayes",
+  s:"Um sistema bayesiano de diagnóstico calculou que, após o primeiro sintoma observado, a chance de uma doença subiu de 2% para 20%. Em seguida, um segundo sintoma foi observado.",
+  q:"No raciocínio bayesiano, como o sistema deve usar o valor de 20% ao analisar o segundo sintoma?",
+  o:["Descartá-lo e voltar sempre aos 2% originais.",
+     "Usá-lo como verossimilhança do segundo sintoma.",
+     "Somá-lo diretamente à probabilidade do segundo sintoma.",
+     "Ignorá-lo, pois Bayes só permite uma evidência.",
+     "Usá-lo como o novo prior: o posterior de uma etapa vira o prior da próxima."],
+  c:4, tip:["Aprender é atualizar",[
+    "Na <b>atualização bayesiana</b>, cada posterior vira o prior da próxima evidência.",
+    "A crença vai sendo refinada à medida que chegam dados novos.",
+    "Isso supõe evidências independentes dada a hipótese, como no Naive Bayes."]]}
+];
+
+/* ============ ESTADO ============ */
+const LETTERS = ["A","B","C","D","E"];
+const app = document.getElementById("app");
+const trail = document.getElementById("trail");
+const live = document.getElementById("live");
+let order = [], idx = 0, results = [], score = 0, streak = 0, current = null, answered = false;
+
+const shuffle = a => { a = a.slice(); for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]]} return a; };
+const el = (tag, cls, html) => { const e=document.createElement(tag); if(cls) e.className=cls; if(html!=null) e.innerHTML=html; return e; };
+const reduced = () => matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+/* Sorteio equilibrado: mesma quantidade por tema.
+   As de prioridade 1 entram sempre, em qualquer modo; depois vêm as de prioridade 2
+   e, por fim, as demais (em ordem aleatória). No fim tudo é embaralhado. */
+function pickQuestions(n){
+  const keys = Object.keys(TOPICS), per = n / keys.length;
+  const rank = i => QUESTIONS[i].p || 9;
+  let pool = [];
+  keys.forEach(t=>{
+    const ranked = shuffle(QUESTIONS.map((q,i)=>q.t===t?i:-1).filter(i=>i>-1)).sort((a,b)=>rank(a)-rank(b));
+    const must = ranked.filter(i=>rank(i)===1).length;
+    pool = pool.concat(ranked.slice(0, Math.max(per, must)));
+  });
+  pool = shuffle(pool).sort((a,b)=>rank(a)-rank(b));
+  while(pool.length > n) pool.pop();
+  return shuffle(pool);
+}
+
+/* ============ TELA INICIAL ============ */
+function renderStart(){
+  document.getElementById("scoreBox").hidden = true;
+  trail.hidden = true;
+  app.innerHTML = "";
+  const c = el("section","card hero");
+  c.innerHTML = `
+    <div class="emoji">🤖</div>
+    <h1>Bora revisar para a prova?</h1>
+    <p>Casos práticos de Inteligência Artificial e Machine Learning com cinco alternativas cada. Leia o cenário, escolha uma resposta e veja na hora se acertou.</p>
+    <ul class="rules">
+      <li>✅ Acertou: ganha uma dica sobre o tema</li>
+      <li>❌ Errou: veja sua resposta ao lado da correta</li>
+      <li>⌨️ Teclas A a E também funcionam</li>
+    </ul>
+    <div class="pick-title">Quantas questões você quer fazer?</div>`;
+  const grid = el("div","sizes");
+  [[10,"Aquecimento","~15 min"],[20,"Revisão","~30 min"],[30,"Treino forte","~45 min"],[40,"Completão","~1 hora"]].forEach(([n,l,t])=>{
+    const b = el("button","size",`<span class="n">${n}</span><span class="l">${l}</span><span class="t">${t}</span>`);
+    b.setAttribute("aria-label",`${n} questões, ${l}, ${t}`);
+    b.onclick = () => start(pickQuestions(n));
+    grid.appendChild(b);
+  });
+  c.appendChild(grid);
+  c.appendChild(el("p","note","As questões são sorteadas com a mesma quantidade para cada um dos 5 temas da prova."));
+  app.appendChild(c);
+  grid.firstChild.focus();
+}
+
+function start(list){
+  order = list; idx = 0; results = []; score = 0; streak = 0;
+  document.getElementById("scoreBox").hidden = false;
+  trail.hidden = false;
+  updateScore();
+  renderQuestion();
+}
+
+function renderTrail(){
+  trail.innerHTML = "";
+  order.forEach((qi,i)=>{
+    const s = el("span","seg");
+    const r = results[i];
+    if(r) s.classList.add(r.ok?"ok":"bad");
+    else if(i===idx) s.classList.add("now");
+    trail.appendChild(s);
+  });
+  trail.setAttribute("aria-label",`Progresso: questão ${Math.min(idx+1,order.length)} de ${order.length}`);
+}
+
+function updateScore(){
+  document.getElementById("scoreNum").textContent = score;
+  document.getElementById("streakNum").textContent = streak;
+}
+
+/* ============ QUESTÃO ============ */
+function renderQuestion(){
+  answered = false;
+  const q = QUESTIONS[order[idx]];
+  current = { q, map: shuffle([0,1,2,3,4]) };
+  renderTrail();
+  app.innerHTML = "";
+  const c = el("section","card");
+  const meta = el("div","meta");
+  meta.appendChild(el("span","topic", TOPICS[q.t].name));
+  meta.appendChild(el("span","count", `Questão ${idx+1} de ${order.length}`));
+  c.appendChild(meta);
+  const sc = el("div","scenario");
+  sc.appendChild(el("b",null,"📋 Cenário"));
+  sc.appendChild(document.createTextNode(q.s));
+  c.appendChild(sc);
+  const h = el("h2","q"); h.textContent = q.q; h.id="qtitle"; c.appendChild(h);
+
+  const ul = el("ul","opts"); ul.setAttribute("aria-labelledby","qtitle");
+  current.map.forEach((orig,pos)=>{
+    const li = el("li");
+    const b = el("button","opt",`<span class="letter">${LETTERS[pos]}</span><span class="txt"></span>`);
+    b.querySelector(".txt").textContent = q.o[orig];
+    b.onclick = () => choose(pos);
+    li.appendChild(b); ul.appendChild(li);
+  });
+  c.appendChild(ul);
+  c.appendChild(el("div","fb"));
+
+  const act = el("div","actions");
+  const left = el("div");
+  left.appendChild(el("span","hint","Clique numa alternativa ou tecle de A a E."));
+  act.appendChild(left);
+  const next = el("button","btn", idx===order.length-1 ? "Ver meu resultado" : "Próxima questão");
+  next.hidden = true; next.id="nextBtn"; next.onclick = goNext;
+  act.appendChild(next);
+  c.appendChild(act);
+
+  const quit = el("button","link","Encerrar e ver resultado parcial");
+  quit.onclick = () => { if(results.length) renderEnd(); else renderStart(); };
+  quit.style.marginTop = ".75rem";
+  c.appendChild(quit);
+
+  app.appendChild(c);
+  window.scrollTo({top:0, behavior: reduced() ? "auto":"smooth"});
+}
+
+function choose(pos){
+  if(answered) return;
+  answered = true;
+  const { q, map } = current;
+  const correctPos = map.indexOf(q.c);
+  const ok = pos === correctPos;
+  [...app.querySelectorAll(".opt")].forEach((b,i)=>{
+    b.disabled = true;
+    if(i===correctPos) b.classList.add("right", ...(ok?["pop"]:[]));
+    else if(i===pos) b.classList.add("wrong","shake");
+    else b.classList.add("dim");
+  });
+  results[idx] = { qi: order[idx], ok, chosen: map[pos] };
+  if(ok){ score++; streak++; confetti(); } else streak = 0;
+  updateScore(); renderTrail();
+
+  const fb = app.querySelector(".fb");
+  fb.className = "fb show " + (ok?"ok":"bad");
+  const tipHtml = `<div class="tip"><b class="h">💡 ${q.tip[0]}</b><ul>${q.tip[1].map(t=>`<li>${t}</li>`).join("")}</ul></div>`;
+  if(ok){
+    const cheers = ["Acertou! 🎉","Mandou bem! 🎯","Isso aí! 🚀","Perfeito! 🌟","Na mosca! 🏹"];
+    const msg = streak>=3 ? `Acertou! ${streak} seguidas 🔥` : cheers[Math.floor(Math.random()*cheers.length)];
+    fb.innerHTML = `<h3>${msg}</h3>${tipHtml}`;
+    live.textContent = "Resposta correta.";
+  } else {
+    fb.innerHTML = `<h3>Não foi dessa vez 🤔</h3>
+      <div class="compare">
+        <div class="w"><strong>Você marcou ${LETTERS[pos]}</strong><span class="t1"></span></div>
+        <div class="r"><strong>A correta é ${LETTERS[correctPos]}</strong><span class="t2"></span></div>
+      </div>${tipHtml}`;
+    fb.querySelector(".t1").textContent = q.o[map[pos]];
+    fb.querySelector(".t2").textContent = q.o[q.c];
+    live.textContent = `Resposta errada. A correta é a alternativa ${LETTERS[correctPos]}.`;
+  }
+  app.querySelector(".hint").textContent = "Tecle Enter para continuar.";
+  const nb = document.getElementById("nextBtn"); nb.hidden = false; nb.focus({preventScroll:true});
+}
+
+function goNext(){ if(idx < order.length-1){ idx++; renderQuestion(); } else renderEnd(); }
+
+/* ============ RESULTADO ============ */
+function renderEnd(){
+  const done = results.filter(Boolean);
+  const total = done.length;
+  const pct = total ? score/total : 0;
+  const stars = pct===1?5: pct>=.8?4: pct>=.6?3: pct>=.4?2: pct>0?1:0;
+  const msg = pct===1 ? "Gabaritou! Você está pronto para a prova."
+    : pct>=.7 ? "Muito bom! Dê uma olhada nos pontos de melhoria abaixo e está tudo certo."
+    : pct>=.4 ? "Bom começo. Veja abaixo os temas que precisam de mais atenção."
+    : "Hora de revisar com calma. Siga as sugestões abaixo e tente de novo.";
+  order = done.map(r=>r.qi);
+  idx = order.length; renderTrail();
+  document.getElementById("scoreBox").hidden = false;
+  app.innerHTML = "";
+  const c = el("section","card");
+
+  const head = el("div","result-head");
+  head.innerHTML = `<div class="hero" style="padding:.5rem 0 0"><div class="emoji">${pct===1?"🏆":pct>=.7?"🎉":pct>=.4?"💪":"📚"}</div></div>
+    <div class="big-score">${score}<span>/${total}</span></div>
+    <div class="stars" aria-label="${stars} de 5 estrelas">${"⭐".repeat(stars)}${"☆".repeat(5-stars)}</div>
+    <p style="margin:0 auto; max-width:34rem; color:var(--ink-soft)">${msg}</p>`;
+  c.appendChild(head);
+
+  const stats = {};
+  done.forEach(r=>{ const t=QUESTIONS[r.qi].t; stats[t]=stats[t]||{ok:0,n:0}; stats[t].n++; if(r.ok) stats[t].ok++; });
+  const sec1 = el("div","sec"); sec1.appendChild(el("h3",null,"📊 Seu desempenho por tema"));
+  const bars = el("div","bars");
+  Object.keys(TOPICS).filter(t=>stats[t]).forEach(t=>{
+    const {ok,n} = stats[t], p = ok/n;
+    const row = el("div","bar-row");
+    row.innerHTML = `<div class="lbl"><b>${TOPICS[t].name}</b><span>${ok} de ${n} (${Math.round(p*100)}%)</span></div>
+      <div class="track"><div class="fill ${p>=.7?"hi":p>=.5?"md":"lo"}" data-w="${p*100}"></div></div>`;
+    bars.appendChild(row);
+  });
+  sec1.appendChild(bars); c.appendChild(sec1);
+
+  const sec2 = el("div","sec"); sec2.appendChild(el("h3",null,"🎯 O que você pode melhorar"));
+  const imp = el("div","improve");
+  const weak = Object.keys(TOPICS).filter(t=>stats[t] && stats[t].ok/stats[t].n < .7)
+    .sort((a,b)=>stats[a].ok/stats[a].n - stats[b].ok/stats[b].n);
+  if(weak.length){
+    weak.forEach(t=>{
+      const box = el("div","imp");
+      const {ok,n} = stats[t];
+      box.innerHTML = `<b class="h">${TOPICS[t].name}: ${ok} de ${n}</b><ul>${TOPICS[t].study.map(s=>`<li>${s}</li>`).join("")}</ul>`;
+      imp.appendChild(box);
+    });
+    const strong = Object.keys(TOPICS).filter(t=>stats[t] && stats[t].ok/stats[t].n >= .7);
+    if(strong.length){
+      const g = el("div","imp good");
+      g.innerHTML = `<b class="h">Seus pontos fortes</b>${strong.map(t=>TOPICS[t].name).join(", ")}. Continue assim!`;
+      imp.appendChild(g);
+    }
+  } else {
+    const g = el("div","imp good");
+    g.innerHTML = `<b class="h">Você foi bem em todos os temas 👏</b>Para fechar a preparação, tente o modo com mais questões ou refaça as que errou para fixar os detalhes.`;
+    imp.appendChild(g);
+  }
+  sec2.appendChild(imp); c.appendChild(sec2);
+
+  const wrongs = done.filter(r=>!r.ok), rights = done.filter(r=>r.ok);
+  const mkList = (title, list, isOk) => {
+    const s = el("div","sec"); s.appendChild(el("h3",null,title));
+    if(!list.length){ s.appendChild(el("p","empty", isOk ? "Nenhum acerto desta vez. Leia as dicas e tente de novo!" : "Nenhum erro. Parabéns!")); return s; }
+    if(!isOk) s.appendChild(el("p","empty","Toque em uma questão para ver o que você marcou e a resposta certa."));
+    const l = el("div","qlist");
+    list.forEach(r=>{
+      const q = QUESTIONS[r.qi], n = done.indexOf(r)+1;
+      const d = el("details","qitem");
+      const sm = el("summary",null,`<span class="dot ${isOk?"ok":"bad"}">${isOk?"✓":"✗"}</span><span class="qt"><small></small><span></span></span>`);
+      sm.querySelector("small").textContent = `Questão ${n}: ${TOPICS[q.t].name}`;
+      sm.querySelector(".qt > span").textContent = q.q;
+      d.appendChild(sm);
+      const body = el("div","body");
+      if(!isOk){
+        body.innerHTML = `<div class="w"><strong>Você marcou</strong><span class="a"></span></div><div class="r"><strong>Resposta certa</strong><span class="b"></span></div>`;
+        body.querySelector(".a").textContent = q.o[r.chosen];
+      } else {
+        body.innerHTML = `<div class="r"><strong>Sua resposta</strong><span class="b"></span></div>`;
+      }
+      body.querySelector(".b").textContent = q.o[q.c];
+      d.appendChild(body);
+      l.appendChild(d);
+    });
+    s.appendChild(l); return s;
+  };
+  c.appendChild(mkList(`❌ Questões que você errou (${wrongs.length})`, wrongs, false));
+  c.appendChild(mkList(`✅ Questões que você acertou (${rights.length})`, rights, true));
+
+  const acts = el("div","end-actions");
+  if(wrongs.length){
+    const b1 = el("button","btn",`Refazer as ${wrongs.length} que errei`);
+    b1.onclick = ()=> start(shuffle(wrongs.map(r=>r.qi)));
+    acts.appendChild(b1);
+  }
+  const b2 = el("button", wrongs.length ? "btn ghost":"btn","Nova revisão");
+  b2.onclick = renderStart;
+  acts.appendChild(b2);
+  c.appendChild(acts);
+
+  app.appendChild(c);
+  window.scrollTo({top:0, behavior: reduced() ? "auto":"smooth"});
+  requestAnimationFrame(()=>requestAnimationFrame(()=>app.querySelectorAll(".fill").forEach(f=>f.style.width=f.dataset.w+"%")));
+  if(pct>=.7 && total) confetti(true);
+  acts.firstChild.focus({preventScroll:true});
+}
+
+document.addEventListener("keydown", e=>{
+  if(e.ctrlKey||e.metaKey||e.altKey) return;
+  if(!app.querySelector(".opt")) return;
+  const i = LETTERS.indexOf(e.key.toUpperCase());
+  if(!answered && i>-1){ e.preventDefault(); choose(i); }
+  else if(answered && e.key==="Enter" && document.activeElement?.id!=="nextBtn"){ e.preventDefault(); goNext(); }
+});
+
+/* ============ CONFETE ============ */
+const cv = document.getElementById("confetti"), cx = cv.getContext("2d");
+let parts = [], raf = null;
+function resize(){ cv.width = innerWidth*devicePixelRatio; cv.height = innerHeight*devicePixelRatio; cx.setTransform(devicePixelRatio,0,0,devicePixelRatio,0,0); }
+addEventListener("resize", resize); resize();
+function confetti(big){
+  if(reduced()) return;
+  const colors = ["#5B4BDB","#FFC940","#128A63","#FF7A80","#4FB3FF"];
+  const n = big?160:70;
+  for(let i=0;i<n;i++) parts.push({x:innerWidth/2+(Math.random()-.5)*200, y:innerHeight*.45, vx:(Math.random()-.5)*12, vy:-Math.random()*12-4,
+      s:Math.random()*7+4, r:Math.random()*6, vr:(Math.random()-.5)*.3, c:colors[i%colors.length], life:0});
+  if(!raf) tick();
+}
+function tick(){
+  cx.clearRect(0,0,innerWidth,innerHeight);
+  parts.forEach(p=>{ p.vy+=.35; p.vx*=.99; p.x+=p.vx; p.y+=p.vy; p.r+=p.vr; p.life++;
+    cx.save(); cx.translate(p.x,p.y); cx.rotate(p.r); cx.fillStyle=p.c; cx.fillRect(-p.s/2,-p.s/4,p.s,p.s/2); cx.restore(); });
+  parts = parts.filter(p=>p.y<innerHeight+30 && p.life<220);
+  raf = parts.length ? requestAnimationFrame(tick) : (cx.clearRect(0,0,innerWidth,innerHeight), null);
+}
+
+renderStart();
+</script>
+</body>
+</html>
